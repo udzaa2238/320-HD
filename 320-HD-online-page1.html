@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>fw4free-app24-action 21</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- External CSS -->
+  <link href="https://playtvthai.github.io/m3u8/css/bootstrap.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link href="https://playtvthai.github.io/m3u8/css/style.css" rel="stylesheet" type="text/css" media="all" />
+  <link rel="stylesheet" href="https://playtvthai.github.io/m3u8/css/normalize.css">
+  <link rel="stylesheet" href="https://playtvthai.github.io/m3u8/css/custom.css">
+  <link rel="stylesheet" href="https://playtvthai.github.io/m3u8/css/main.css">
+  <link rel="stylesheet" href="http://hdtvdd.com/work/assets_remark/fonts/font-awesome/font-awesome.min.css">
+  <link rel="stylesheet" href="http://hdtvdd.com/work/font/stylesheet.css" type="text/css" charset="utf-8" />
+  <link rel="stylesheet" href="http://hdtvdd.com/work/css/8k.css" type="text/css" charset="utf-8" />
+  <link rel="stylesheet" href="http://hdtvdd.com/work/css/overlay.css" type="text/css" charset="utf-8">
+  <link href="http://hdtvdd.com/work/css/theme.css" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:100,200,300,400,500,600,700,800,900" rel="stylesheet" type="text/css">
+
+  <!-- JS (dedupe jQuery) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://playtvthai.github.io/m3u8/js/jquery.backstretch.js"></script>
+  <script src="http://hdtvdd.com/work/bootstrap-login-forms/form-2/assets/js/scripts.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100%;
+      background: #000;
+      box-sizing: border-box;
+      overflow-x: hidden;
+      font-family: 'Roboto Condensed', sans-serif;
+    }
+    *, *:before, *:after { box-sizing: inherit; }
+
+    /* Search/filter bar */
+    .filter-bar {
+      margin: 10px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .filter-bar input, .filter-bar select {
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #1f2025;
+      color: #fff;
+    }
+
+    /* Movie grid 5 columns */
+    /* Movie grid */
+    .movies-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 -5px;
+      padding-top: 10px;
+    }
+    .movie-item {
+      flex: 0 0 10%; /* เล็กลง, 5 คอลัมน์ต่อแถว */
+      box-sizing: border-box;
+      padding: 0 5px;
+      margin-bottom: 20px;
+      max-width: 200px; /* หรือจำกัดขนาดสูงสุด */
+    }
+    .movie-box {
+      background: #1f2025;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .movie-image button {
+      width: 100%;
+      height: 0;
+      padding-top: 147%;
+      background-size: cover;
+      background-position: center;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .movie-title {
+      color: white;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 6px;
+      line-height: 1.2;
+      padding: 0 4px;
+      word-break: break-word;
+    }
+
+    @media (max-width: 1200px) {
+      .movie-item { flex: 0 0 33.333%; }
+    }
+    @media (max-width: 900px) {
+      .movie-item { flex: 0 0 50%; }
+    }
+    @media (max-width: 600px) {
+      .movie-item { flex: 0 0 100%; }
+    }
+
+    .pagination-wrapper { text-align: center; margin-top: 20px; }
+    .pagination > li > a, .pagination > li > span { padding: 6px 12px; }
+  </style>
+
+  <script>
+    $(document).ready(function(){
+      $("#myBtn").click(function(){ $("#myModal").modal(); });
+      $("#myBtn2").click(function(){ $("#myModal2").modal(); });
+      $("#myBtn_vip").click(function(){ $("#myModal_vip").modal(); });
+      $("#myBtn_cpass").click(function(){ $("#myModal_changepass").modal(); });
+
+      // Filter logic
+      function normalizeText(t) {
+        return t.trim().toLowerCase();
+      }
+
+      function applyFilter() {
+        const query = normalizeText($("#movie-search").val() || "");
+        const category = $("#category-filter").val();
+        $(".movie-item").each(function() {
+          const title = normalizeText($(this).find(".movie-title").text() || "");
+          const itemCat = $(this).attr("data-category") || "all";
+          const matchesSearch = query === "" || title.includes(query);
+          const matchesCategory = category === "all" || itemCat === category;
+          if (matchesSearch && matchesCategory) {
+            $(this).show();
+          } else {
+            $(this).hide();
+          }
+        });
+      }
+
+      $("#movie-search").on("input", applyFilter);
+      $("#category-filter").on("change", applyFilter);
+    });
+  </script>
+</head>
+
+<body>
+  <div class="container" style="background-color:rgba(0,0,0,0); height:100%;">
+    <div class="container_wrap">
+      <div class="row" style="background-color:#27282c;border-radius:5px;">
+        <div class="col-lg-12 col-md-12 col-xs-12" style="margin-top:10px;margin-bottom:10px;">
+          <div class="row">
+            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5">
+              <div class="logo"></div>
+            </div>
+            <div class="col-lg-10 col-md-12 col-xs-12">
+              <div class="col-lg-12 col-md-12 col-xs-12" align="left" style="padding:5px;">
+                <div class="form-inline">
+                  <div class="form-group" style="margin:5px;">
+                    <form action="" method="get" name="lange" style="display:inline;">
+                      <input name="lange" type="hidden" id="lange" value="en">
+                      <input type="image" src="/web/images/en.gif" name="submit" width="60" height="20" alt="submit"/>
+                    </form>
+                  </div>
+                  <label for="form-password"><font color="white">ชื่อ : </font><font color="yellow">[ ผู้เฒ่าพเนจร ™ ]</font></label>
+
+                  <button class="btn btn-default" type="button" style="background-color:transparent;border-radius:2px;border:0;font-size:18px;color:#FFF;padding:0 5px;font-family:'rsuregular';" onclick="window.location.href='go:digital'">🏠 Home ™</button>
+                  <button class="btn btn-default" type="button" style="background-color:transparent;border-radius:2px;border:0;font-size:18px;color:#FFF;padding:0 5px;font-family:'rsuregular';" onclick="window.location.href='go:live'">📡 ถ่ายทอดสด ™</button>
+                  <button class="btn btn-default" type="button" style="background-color:transparent;border-radius:2px;border:0;font-size:18px;color:#FFF;padding:0 5px;font-family:'rsuregular';" onclick="window.location.href='go:main-serie'">🎞️ ดูซีรี่ย์ ™</button>
+                  <button class="btn btn-default" type="button" style="background-color:transparent;border-radius:2px;border:0;font-size:18px;color:#FFF;padding:0 5px;font-family:'rsuregular';" onclick="window.location.href='go:main-movie'">🎥 ดูหนัง ™</button>
+                  <button class="btn btn-default" type="button" style="background-color:transparent;border-radius:2px;border:0;font-size:18px;color:#FFF;padding:0 5px;font-family:'rsuregular';" onclick="window.location.href='go:main-movie'">📽️ ดูสารคดี ™</button>
+                  <button class="btn btn-default" type="button" style="background-color:transparent;border-radius:2px;border:0;font-size:18px;color:#FFF;padding:0 5px;font-family:'rsuregular';" onclick="window.location.href='http://action_exit'">🚪 ออก</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- filter bar -->
+          <div class="filter-bar">
+            <div>
+              <input id="movie-search" type="text" placeholder="ค้นหาหนัง..." />
+            </div>
+            <div>
+              <select id="category-filter">
+                <option value="all">ทั้งหมด</option>
+                <option value="action">Action</option>
+                <option value="drama">Drama</option>
+                <option value="sci-fi">Sci-Fi</option>
+                <option value="exclusive">Exclusive</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- รวมทุก movie-item ไว้ใน grid เดียว -->
+          <div class="movies-grid">
+		  
+		  
+ <div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/40-2.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/RlpqQzBERy80RjIweHdPUkdHZC9RUjBTK2xKK29rZkE4UDFkM0tmaHNlNHVzNGd5d1ptblNUVFZjQVlzWnRqRnpJTkhNM1g2aEtURy83dXkwMG1BckxZUHpNR0IxdHQvdEh1TlhoVVZiSkE3NFNkV3RYL2kyV2gzQ01KazNzWHZ5QUpmeis4UmlDSnJ4UUxHem4xSUJtVXh0THhIeS9ZSlAwai9DMjFrVThUZE1GYUpUQUU0V2lNYVV2Ulgrd09F.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">My Oxford Year (2025) อ็อกซ์ฟอร์ดในฝันของสาวอเมริกัน (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/4140.jpg);" onclick="window.location.href='https://online225.com/hls/UEw1Q0h5YXZmdHN5YVYralMrcEhMTFdvcG9XWGo5NDl6MzdEZFZ5d0RXUm9Ib25tMWgyNHZucFZFRllySmNjck5XdUZ5c3JsaFZ1eStuMlkyUTN1TUtQZVpZcllva2VhNThJN0VJUW5HWjlLZlBpZHJpcnBFRTYzK25CSHRGd0hoaWJNbVUrRVRxWVNJbVRqTC8yU0ZpSzdhemExUGNSTkhaVkxzZ09JZHVBZGNnZi9GZXNsckgzRnBYMWlkcm9Z.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">The Stone เดอะสโตน พระแท้ คนเก๊ (2025) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/427.jpg);" onclick="window.location.href='https://online225.com/hls/WkFEV1hzRjVIem92bUtwZ3kydFd1cjcreWtnSC9VQURtWittVGs3dERCREhkbU9sbGw2N0VCaTNzdVpzdjBrbVl5VktRKzNlUCtqZzVadXJ5ZHRMYldXVDVaREE4d2U5ajNiRUFZSWpwWTRyMlRCUGd5eGYyV2RkdmtZcCtialJaSlhxTGNEK1pBMWFqS0hrRjdnOCtMSEVsYTBmWUN2bFNLN0Z3bUk2RFl4Ukc5ZzcrQkcva1RZSEtSL1RTdXBU.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">An Honest Life ชีวิตซื่อ (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/5350-5.jpg);" onclick="window.location.href='https://online225.com/hls/WXBtUXBiajl5Q0lGVExuL0lkZ1RsRzRWUURIblVFOFdGMCtqdkdPTlZGeTd3YjhFbmp5b01BaitGemtTb2dJakdLaVdIcFNlWDJrcGxUbEtBbi9zaFNia3hRbU1oMlBuT05sMFBzeW9OSXJBK01MNGZhTVNyVmpOcjA4anJ3citTZE4xMzcyeFVlaTBncVVPRnpTaFVSNzJ1L3ZoWUpIU2J3amRyaWdmeDlCVTZCRWZzMXlSalBsUUswK1N6UHZ3.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Ballerina จักรวาลของ จอห์น วิค บัลเลรินา แค้นกว่านรก (2025) เสียงโรง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/4240474.jpg);" onclick="window.location.href='https://online225.com/hls/K00vVnRRcmxmUXE2QW50VFhRb1kyNjFqSlo4dXZOdmZpMDNZR3M0aUFWaElJU29sVXJreGtZZGRBeS9LTjNzdXo2aklvMC91OFBjOXFWT2pxbHYvYTllWHBVQmsvUno3VEdlQ1Jjcm81NnJRTkRwWlpTaDRWSXRER3dZV2tnbEJ4UG9OSEgrYWZ6VTZUZElTWjEvWDF5cnM1NkNyNjE4clB5NGRybzdOSTlYTFlJTklRT1FRTzdlZlBWUHF0ckhk.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">ซองแดงแต่งผี The Red Envelope (2025) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/40410.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/VEVNNEdnN0NreElvYzhGdzdvWVBSSDV6VWtrU1FpWnhNSjgzZ2VWaFdxdHdsNHl2VzRTRmIrRG0rRGVDSFZnRWNtZnZPNUF0MlgrS1F0QitFSDBIeHlWZEVzM0hMMzZuaHNxeHVzcVU1Ukx3azdRNnhaNG5YeFdXaWxxam0yYkpNTVlwZjRKeUY3SFpVSG43TS83ZG5qUy8ybnBDNVZ3dXNhbUxNVTVsWWJNUGhybDhreDlDNHpzZGZ4QzZzbFpF.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">How to Train Your Dragon (2025) อภินิหารไวกิ้งพิชิตมังกร (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/Wall-to-Wall-ฝันร้าย-84-ตร.ม.-2025.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/MktvU3pwQWJMV202Ujlpdlo1b3NFMk9wYjhjeVVpUGR0YlpTWHFOR0NOZGxiWGhDNTFCY0J3MmNkN1lVZkQwWVBzc21lSlJub0VCbnpLVnB4YXRIUzdLMHMxV1o1YUxYYWttaStNbXFHdkU4VGV1eDg0UEkraHFTNjVHL0F4YkZyaGhLVHJnMXdDYlNocWpWREJHSEliNVRINmxkZTkrQ1VMWnZWclhCWWdmcU1zaER3TW5BYjYyazZ0N2RLbEZ2.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Wall to Wall ฝันร้าย 84 ตร.ม. (2025)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/5.jpg);" onclick="window.location.href='https://online225.com/hls/aHJZRnlCNXVvd21mYlZQaFBBemFkYXlQdWVoWkNVUmIzOHRxWEg5L0hKTG5xbXBBeW8zblRzSnBnRFVsTzFEOHdNZWtUL0M2ajZZampnK3ZSNjFHRCttWGk2MzY4azB1MXgrZ1VySDY4ZHlQRmtuUTcwaWNaZmhBU1F2U0Z6STRyeEVicnRoa1dsekhlRFJ0My9sbU9zaDBKQ1pRYVNWaHQxMUJ3a05kUUU5OW5CRHVKWUpaeDhmdExheFowT2FL.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Almost Cops คู่สืบ คู่อันตราย (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/4240-2.jpg);" onclick="window.location.href='https://online225.com/hls/dWNPTGtObjI4bTdOYms0czNJQTNSMUJoSUFxYXUrTjlBRG0wcWVyNkVCd3lKOHg3aXE2alpGMS84YzBHbVl0akJJYUJVTXRwdDN6N0NiaUx1SE43eE00RWRhNy8rOU90dktNUWxiTDZrZTVyQXhBZ3MzaWFEbzBzWlpGVllVZzRFTFRHM0dna0dJWHpCS3YzSnV0OWhwdGpSU3VIZFlSR2RGalZLZDBVeXg1c29ZOUlnSXZjeFpDa2VPZGJLVUZj.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Madea’s Destination Wedding ป้าลุยแหลกแหกวิวาห์ป่วน (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/42404.jpg);" onclick="window.location.href='https://online225.com/hls/WW9xMWV2ZmM2NzZjMmhGZGtzRDExNnNiTFNWeFNBbmhtT200d1VYbUk0R2NBZWlIR09yaWE2emNjRVVLckcrcjlsVjB4bXJjS2czaCs0QlZ6eW5kU3BqSFhBUS85OHZua01wTC9RTVRYak9uT3QyM21XNXFkd0dSa2dOYjZWRDdLdnpUMXJGOUNwZUdJTHhQS2VSWHdtUndnUzQ2dTkrUVNMb3BHMnI1M2xlZHVrY09oa2lOQlBqcWEzOUI3MHcw.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Brick กำแพง (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/07/1.10.jpg);" onclick="window.location.href='https://online225.com/hls/dVY0ajFickdTMEw1ektub0VzNG5Qbi95WnhZNm5xVi9GOFpDdG1nQS92MGd0K2RQNzhOenJUSURoai9sL2kzSDNMeHVqR3dKZFluV3ZueGRyL1NMMktxV1NadzVSUDV2ZFFKL2tmVm8yYUVZR3Y5dmpRdWlMakJLVDdOWVZhb2crZ1o4YXdCS2tFY1M1Rk5menZISmtoSVBxdkFscDdoVFlwOXIzVWJ6Z3lWVDNWS3BLM2VFdm5YZEI1MndlTHMw.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Ziam ปากกัด ตีนถีบ (2025) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/06/4240-5.jpg);" onclick="window.location.href='https://online225.com/hls/aTg3U0xwVHcwc0RxbXhMcmtOdHRJY1BYdVRRaU10ZDhnZ2tSZjBva1lUNm44eCtEaStsS0Q3N1c0QjhnZkpSUnF1bnV0WEJ6dWlEcWl0Y3FESHRPTmpoWWpIQ1FCU0RoWXF2cDIxWndlS3dneXVHelp6Zzc1UHpQdnA5ZlpYL1gweHF3MnFPczRIY0Q3V1RHRGY5OWJoRDZJL2toQjcwV0s0U0FjZlV4Y1hzanlWODloVTlxdjBKS3NjT3Znbmo0.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">The Old Guard 2 (2025) ดิ โอลด์ การ์ด 2 (พากย์ไทย) HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/06/550-2.jpg);" onclick="window.location.href='https://online225.com/hls/UmxsZm1nZ00zTmUzSWpRK1A0ZW9mbXVoWXFYZzJqVHhUUlNCV2tlbHU0NWpGOVNlYU9GNU0rS2pzVHVTaEZRa2dJQ21ZUXpDcWJyMUVRZzhId1lzNmpUTVJhZTRsenZjcU9sbjdLZEZuZjZMcEdyTVVmbjdqdy9tRENrd0ZvRTYybmIwTStOc1hHRjRycDMrM01hVmxCaDhKSUlXc2c1WXp5cFBMek4ySUppMXpybEt0SU92MjArUUpZTTBVTUtH.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Something in the Water (2024) ครีบขย้ำคลั่งมหาสมุทร (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/01/4240-8.jpg);" onclick="window.location.href='https://online225.com/hls/ZUNoQjJNV2VIQ0ZidW9rVGdLL2Z5THFLRE5UU1pqQXV1SHltQkdudlZ5SHBvSk4rMTNzNlZIc2lhMnRMbml3cVZVMld4QVlSeHVzb2tqNlFGeHhzUUVvTTdZSFNzWitWZEtpWWkvN1ZTUUc4N3JDQkM3Tm15emhsU1lSOEVpTG5LdVhnUEVMRlpYazYvTkFsQXI1ZklOMTBJK1B0eEFNMzRwQWZ4T3dBeEkrclZQbzE4U3FXUFI2bkt6NnZmUGNF.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Invincible Swordsman เดชคัมภีร์เทวดา (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/06/538.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/aHlTa1Q1N3ZZWk1VdytnNG9kS1NnMWlKNWV3TDIzZU5pRlBiK0VEOWRrOS9RRmNWVWx2VW1KeHZpcVVLMm5mbDQxTVBxeXlMcFYxckpFbkh5a0VsMkNtcjhLT1NNMVdrMFNIZ29rS2lOUEFIT3ZQZjVlZ1JJcWJyU0dVYkUxM0ZuVUtLU0h1SHAydUlCOVlOSmZVQVRMZm4xaG9aM1NPOUlCQ2NmRDFHYjVvY25mOXgxUk50ZWMvRkdpZmtrM05v.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">นาคบรรพ์ Eternal Bond (2025) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/06/4340-1.jpg);" onclick="window.location.href='https://online225.com/hls/eFhkOUZVUjRkTUJZWkcxemhwSDhxZFZSTS9WTjR6SjhPSkJnRUVPZDZWV0M1NHRCQlNzWFpUT1psb3JnU3VRcHhyUjZDSnVaeHd2WHdGRUY5RzhUYmZ3MUFJdDRQaVpwQUo3cThNMXVFdTIzWk5GL250R0pvNFo2WUdPaGc2bC9yTTdEdTVBWWtHRjJVOW9wcERQTWNMYzdOODRRK200YXV4aUdNV1ZIb0JSbHo5dng3MEhXV1hMc2RNemV4MmQy.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Cheers to Life (2025) เชียร์ส ทู ไลฟ์ (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/06/440.jpg);" onclick="window.location.href='https://online225.com/hls/THI0KzRKVTQ5MHdVUEJKOUpWNnNId3ZXb0VnUVpQVDFZMWdvTzNPaW1Zb3lVMklLc1RsWHE0N3Ercy84ZnRFaHBNSzJvSDZSZDBHSEE3aGgzTkk2SExqWGR4bXhTYjN5UDFObnV5RWVBdzZQNFQ4RmZCQm9aa1kyTW9WSG1nMWc3alB0cytxSXc5UmRqVlVoYnFoWUpwSzZKOEkxd0pGS3pnYjZkcjFwdG9EOVh1ODZLMmtmVE56OENxNDljOGhV.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Snow White สโนว์ไวท์ (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/06/101.jpg);" onclick="window.location.href='https://online225.com/hls/RjZHNDJTc1NSOS9JUWtlWlN5ckgzS3NxY3NiVThybEFIaHJXNFA5RVphb3gzNnRSa2J5VVdQK3REbVlFb0c4Nzc1V2E3a3dZenJ0Si9UYnlFM05ZL0t5TGY2UUdaQVAyWS9BYWlIZzl4bEVVMVZkS05SaUJpWDFYVTZKTUVsWWdQVjNVM3NUR1lVQXM3b1B1bjJxQzNSZWlubXEvZDVFRW91T3hwWlloUFpTZVg2MWQ4NGVvTHJKLzhtMGVhTEFE.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Project Silence เขี้ยวชีวะ คลั่งสะพานนรก (2024) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/06/4401.jpg);" onclick="window.location.href='https://online225.com/hls/czZyWE96UFNFdlVOK1VPRzdBQkY1N0NrdlBqYzNiQTFpUkdJZTdyKzEyMTNrN3VFcDJqNWlkd2RYZWl1Y0I4THhqc0xIKzdQMmpZanhpVzAvb1dlTnpGemhPL0FVOEJIWmlFK2dHeWU5VkU5eVlody81dnp1eGFvY1FIeU92S3BzNTFJUWJObkQxVlE0UVV5T3I1a3lWb1NsSTJ3V3RoUVk4VjFXRmFLYUtIVlhvZUN3ZGhLZEZiVHZyZjd4ejFO.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">K.O. น็อกเอาท์ (2025) พากย์ไทย HD – Netflix</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/44.jpg);" onclick="window.location.href='https://online225.com/hls/anVKcFU1Zkc2Q1RDbFc1QkNlTGJER2gyTVc1TStyMWFjT0hucWpvMll0R1NQTzZLdW1NZFdsaU1pYVNLUE5ZeGlSMFNjVmpZVkY0MWMvdjBySWZvWmgvajV4UUV1a0ljaDBpVWM4WW5DcWlJYzh2c3ZpWTh3WUwzZXl6dUFOamlGZTZlNm1TS3g1SU5mdkNKYkhGUjBzVFU5dnVkY2Z5VzRaOVBmTkFTd0UzZkRFakNTZXE1SjB1YlZWd3E2RE42.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Secret: Untold Melody ซีเคร็ท ทำนองรักข้ามเวลา (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/5512.jpg);" onclick="window.location.href='https://online225.com/hls/QXhraWxOc2FSWU1WTzhYVkNyWWd4VkVUWGxJZjMzTHJXSjc4cjdQZDVZbTl3VnBGK0M5Y1FZdnJpZjhzVWJGTUtGYlR6b3llOW0ybHFNWDJUMjVtSVlJWmMzSFllVXlMSWNmbG5YN2VJbW1OY0pOUjdYK3hOYmtWRnhMQ0pJc0xyRVlNY1NNWHBPVzhSanZBY3B2YmpTTExOVlFBY3NYRXYwR1RtWGVhd255U0JJbVl6YmhHcXdibkZTYkwvTlEx.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Lost in Starlight เลือนหายในแสงดาว (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/50.jpg);" onclick="window.location.href='https://online225.com/hls/QjM4MDlyYndYc0JFTzludEpTOXBTVDhITHJWbkZZeGtxcWRwTytWTDliVUQ5a3I5MUV2VFgwZU5GTnhwdWJjQkx2d1l2Mk1ZY21pY21TeWl2MVJEYkdnQWc4M3pQREVmc1BsbDZDM2tiWHdETmx3UFJ6QmdCUHVlTmV4SmZHZi9jeitiVDQyTG50UFFPWFFhUFJDT0ZsWGdwd3FrQUJ3Y1o3R2E2NDRLYkk5K1F6bVFwVXc1ZUVKdXVNWXk4bzdP.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">A Widow’s Game กลเกมแม่ม่าย (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/4450.jpg);" onclick="window.location.href='https://online225.com/hls/elNiZTNQOGV4RmwrYzBGSzZpYVFERHNaNWlPOG5wMmFkRkYrb0dNUG5yaEtXUWpmdkx4elVkU0I5dG92b0hJRlZUV0V5dDFZWXVQemw3MmhSQmVrVHFHM2dGZWVhR3RycjhFaFU2Z1lhdFRwWGZ3SUNhWjZyMmtEK21VNlYySDNMb053ZnVMZEFhZGp0YXY3dThPMU9XeTlIQ0krZ3BVNm9zcXE0MnppUWxJa21DdHhNMU8wd2JNYVBpaVhKaWhm.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Fear Street: Prom Queen (2025) ถนนอาถรรพ์: ราชินีงานพรอม (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/104.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/R3FabklwRmdQTGVmQ0xPV280V1kyVkxUMXZmendFQlU2Q3BIc0MvV2FYQ2E0QkNHek9NbUg2bU1PVGgrRTVUVTF2OFArS3NkKzZ0MlVNWk9MYy9uWEZXOEU3M3I3R1BNM1ZBM21RY0pmazhNTUFFcTdiTGNoOWUrUlFIbnhRL2hDNTVDUkpJNjNxL0NVbkJJZjd6bC92WmpPMDZidW8yQnJlWjZhaURCMTZaMU9nOEhZWjAvcGxTeXZHVVp6VUNk.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">A Working Man นรกหยุดนรก (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/988350.jpg);" onclick="window.location.href='https://online225.com/hls/YUJpMTY3QVJIaXI1QjhsSE04N2xuL0JkaHRjVjRDRU03NS9mTXRzMXBEcXdrZktTbTkxbHhxanlTVjRISStmZ3pMMUVZVUQ2cDhiemgzaEc5TnRFVitTNjE1U2NtV2FqQTN0SHQ1anNkUDc5ck1sbGRjajhKMU9Ockp0UEs5Sjl0RjdhYlozVm5MLzlHSG5ydDgwK0hnV3BaeEZsTUVoc0JUbU1meU9GWUVUL1p4cE8yZVg0aFZ2YTBMTTVLUGRE.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Bad Influence วัยรักอันตราย (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/44014.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/eVFUREw3T2YvbldESHQ3Qlo4T0JRS1JVcXNGRTY3MU83ei92bUFZazMyelhsMFhycTlyeVVPYXlNU1hveENFejBDaXE2R0pCbEZIZldjYVFKc2hxVEkvSFhXUStaVlF4TE9TVkFDNS9lcHhqSzhkZXRUREtoNDZUWTNNOTVFMzFESGxaOWdPUFJVTDAwT1NiVkdTT2FaaEY1c2UvZmdUejYveU9oYkw0eWJtSWRqZ2N3dTRUUzJZcU1lMlVGNUZn.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">The Match เดอะ แมทช์ (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/05/4240-1.jpg);" onclick="window.location.href='https://online225.com/hls/VE50d1VoNmtCam5xOW0zaXFCSFRWc1ZRTFFsN2xaM2xNdGV2NlpmWXEyNkxOWUZqRXBlMXFMbEZCRW41a2FUck1RVXV2Z1BNK09UeTE1QlNzWlhBTHdhNVI0R2REek9yVCtxeUVNYWcyUVhyaDNidWI4YUdERXJHSUF3WXozSVJaL3hxTW9vTzlOUHhCaDk0ZmdXRjNQVFBWYmJ4NFVXY3ZtYUM0MlBiTitQb2JiTEJGUCtGaEJTaW9DYlJnT0hL.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Last Bullet 3 แรงทะลุกระสุน 3 (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/04/4340-2.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/aVdsWEx2YVRWeUI0SjYwZzRHMUxlOVR5WGZ3a0lpYjJKbTM4LzU2R1lORzd3WUNJV012UUtVc1FzaWIrMkpGczFCSFVQYW9qRE1FVi9sM2szT0d6bGwvck9GN0pvSWdEM0ZjYUtQOXlrd2NReVk1RiszdzlESngrNFNtamJBSzl3Y3hXVUk5aHdGN3crZXh6dmVlL0l3ay9RaUlORE5PMkdSRXhZZ1dlcXhBWWkzSGVwRW5yNkJsRHNUL0JJVVk3.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">คุณชายน์ The Cliche (2024) HD เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/04/404.jpg);" onclick="window.location.href='https://online225.com/hls/WjA5RzN2dTF1Nm5CekhjS0hPZ0oyZm9jQnlJYklwZ2VpU3B5dFd5b0U0cXhEaUZXWTYwR2Y3aGpmcFRCMWV5L0tybmJXWlpxazZYTU1XcWRUT1F5NTJqUjRpL2x4Vmc2eXdVUHJQYWJYYXVlR0Z6ZG5YOG9PeTYxWHcwcHlUQW9veGtNbmtyL2NZTWJjMDNQeW1uQ3ljeEFYREpLTDFQcnZ0a25lS2ZHenNNcU8wYjd2eTZuZnJ2RHFZNktFNnRK.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Exterritorial พลิกแผนลับลวงระทึก (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/04/535-3.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/cGErbXI0SFhIaG9vZzVpQmpHc2hnaUpzZUIrc2lYU2xBUklaZ1RFd2VuTFNjekZzdnhjbkFrUXdqRHpqNFYrNVhkN2tPZVdQQzhwYzlyanNGelo1WkdPd09vR0hlSnpnZFQvK1JzK1VQS2o1N1BDV0VoVUZzNmFiQnk0bGhpc08rZWdudlR2MWo3dWFmY3RFQUFFbXEwU3ZzMFdlWVNkaTZzVTBYaTRpVDBHWm95QkludnNhcGJiajFPWitDcldP.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">HAVOC ฝ่าหายนะครองเมือง (2025) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/04/440-7.jpg);" onclick="window.location.href='https://online225.com/hls/YVYwbzNXdHJQSlJpZmFBaWFBNzVMeWlGTTZoM0dETDZaSmhyT1Z1Q2NmNncrQjMzQWFieTJ1Q3g0eWxwUGlEbTAxRFFDeWVucVhXRlR0bDRpTUpBaSs3cEhPTUpUVU1GWFNBQ1pxY2dkclRZamlKbjlMcmxoMnNwYWFXcSt1LzZBaHZKVENGTWxkRTJEUmZtVW9XelF3eTV0dXlMUVphblpvdjV2RlhLNDYrZmloenIwejRLRjZ1MDlwa2tCOURZ.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Bullet Train Explosion ระเบิดรถด่วนขบวนระห่ำ (2025) พากย์ไทย Netflix</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/04/440-6.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/ZHJHVGVjM3Bid1duSkFtMyt1eXcxOEM1cUNMRW9xUHFYREZIRGIxVmVpbk1maWYvSmIrcG0rbGI3bG9Qd05RN214aGZFSUJDYWo4Mks2OHlacXJWY2V5U1RaNi82bllJN25CSzZyZlR5OWlRZTBmdE5GN1lKYUF1QXUxcEFQU0pqbWVaNWZnVnJQRGhqN25MaW9yZTdYaEIyb3JRNFI4NGcza21OT3dmNittcVBkdCtFZlp0bXo2dWFJdGt6Zklo.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Companion คอมแพเนียน (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/04/434504.jpg);" onclick="window.location.href='https://online225.com/hls/UzBHZ0lKVDYvZVFQRENNaGM2cjR1QmdoU3NQejZMNy8rOHMrN1VpRDhWcllkT3gwZGFOakdlc1NKNGJua1VDS0IzblNoRFJDUUtqUG51VnFZcWliT05abi9xazRoOVFWQWZzc2VldkRaQkpOLzJGUGRYVnhqeWlqeUlWQzVVQ0lSMlV1ckFybDZjelB0aCtBMlRKNXF5K0trOWt6QVZGeXlZeFNnejNkbUt1aC9GNXV4WTZHMnI1Wm14TVNVd2dq.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Frozen Hot Boys แก๊งหิมะเดือด (2025) เต็มเรื่อง Netflix</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/04/45342.jpg);" onclick="window.location.href='https://online225.com/hls/N1hoeFFSYmhYZXZOSWlEVFpVWGQ3V2hxbytLNzN3UEIwSXRTNm5KQ2poZHlETytrYjRmTytaK2MzNWUwTWs2UExmNnB1MXZPT1pOMFhSaXdiKzhnRVd5M1lqd0RibVlZZFJGUWJhaFdFbHFaQXo4TmxxdTYzakRvWEpPb094TXozZ0ZzK3FJR3ZIdFRiYmxMVVJIQXMrbUN1dDRGL281UllBNUhtYXlUMlRQZjBoRzFrMlpmdjViUWNkNzZtdUFH.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">404 สุขีนิรันดร์..RUN RUN (2024) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/03/440-9.jpg);" onclick="window.location.href='https://online225.com/hls/Mmw1VDIwQXZKRXlyVzU5UXg3Mk5qa1EwMGtpTU4wNUpSUzMraENGN1VsYXNObUZqWlBtbUYrcFFVaTFXNkpZdEcrYzFBUmVXSmhES0ptamtrM0xOQVhpNHphWXhrQlkyOThDL0R1MS9uTldESmRFbmZETHdleXZNbDhjbnJ4VVBUd0lXbWt2bVlUWmxGb1RNM2QrZG1GcUNtVi9YR29jOXdYd1BYaHNkdldxUkdNWFRzay9aeXdDdUJ3ZmJZRlJ1.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Revelations: นิมิตสวรรค์ (2025) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/03/440-12.jpg);" onclick="window.location.href='https://online225.com/hls/aVlscnh2MkRWbUozWTRkMFpBSDY5bEc1Q2QzVE9sRDloQWNyUjV5ZkdONjlxZHVWWDRQdkRzTWhCc0dCMDRpaWNzZDAvbWNPSlBtRTZYOGEwMG1rTEV0aHhka1RHWEJUeFRTeU1GbXJYaUFJZDVqdDg1M3RmczdENXg1QjlsNmtXZCtTZDJFaUNzQUJNWUUrOG9pMTlkbmpTVzJSZEc0NmZkS09pOTFGSVB0b1BNWXRaaFhSTkp3ZnRkMWNXbml2.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Little Siberia ลิตเติ้ล ไซบีเรีย (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/03/53540.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/cGQ3NkZkclVPLzBQbjVqOWp1ZGpNeU0wZGFQQzZTWWNROHBiQ3V0K2lIdG5MWFFGMnFnajYxZDc3SUJXNnFNV3ZNek1MK2tiaGF2YlZZYXkrMTIycEtrL3FsajREcHhFQ2ZqRGNZNFpDVnNDRGE1YkdkMXZnTnhqSTg2Y1NOblErS3JjaEt0Sm4rT2tBdDZUWHViQjhYb3RwbDM2VHZNUmMzTXlyZXdZYmVFUU5EV3NHTTBjbXIya09GZklvWWRa.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">วัยหนุ่ม 2544 (2024) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/03/50-2.jpg);" onclick="window.location.href='https://online225.com/hls/eUxYamJPbmU3WjdqNlUvQmN6TnFISG5YWkMxbGIrY3loLzhSa2U5TlN6WWpEbDBSUFRTZnhuY1k0cE5oS1A0QWRGcFNTa2ZBTFBTWlNiMkNueDBvd2Vaa2tSd3ZhSU0xYjg1SWNEc2dyaEVZdmxhQ3IzekZ1VkNybWozK1N1Q3FsSU9Qb1pZMXhOTVJjbTFUby80T3BnT3YyL3FiSS9KNVFsUlNkUXk2MVlNeDBod0hWbWo4QzBmZ2FaU0h3YUNj.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">The Electric State ท่องแดนจักรกล (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/03/5350-1.jpg);" onclick="window.location.href='https://online225.com/hls/QjBQRGM3Q0dkQm84Um9TdEJldkRKS0hIQi9kV0ZzNTlDTXdGcE8vTW5menpSa2RGME0vUnVrbmdSSytqclZNcXFjOXd0Z2IxU0dXRlV1QWxDQ25UcHh0TU1CZnA1VWMzc09uYWdYMVdFUmxpTmRzamNZSnhMY2owRzBrQmpLaVUvR3NYdk9RVzk3aWVZWk5CcGEwTWRvMkM0YjlHaUVyMDlnQzFkZ2tkNG0wM2RkRHBYemlTMHRjYkJtTCtJUGNn.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Born to fly ปฏิบัติการจ้าวเวหา (2023) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/03/66.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/b3ZUM0xiRW5YU3c3UFEwVExSL3J1YTcwQ2dXSW9UMkxUdFpLbVFSV3hHUEJiM2hRZjlVY3dyTE8zbmVKQUtvUW92ZGdBMU5tbVlNTGp5RjlndFJzRlVIaUk1NnhZdW93L2h1cXE5TFl4TTRwWmJ5UktpQkkwMkJMUmxNVm1VVGtZNWM0VHJ4YnM1RmU0aEFzT1NHOHFmYWE4d0Y5Um8vK2FMajdRVXd2dFo5V0crZjdETkZCZkNDQjNCVll5OEJQ.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Delicious โอชะ (2025) เต็มเรื่อง (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/03/5340.jpg);" onclick="window.location.href='https://online225.com/hls/L1U5ZlYxYTNkVFVYYTNnNytubHBnclFBME9rNXpjYWFZQzg0bFAyZUVOaStobEk4RjNHTER4LzZ3c1JuL1FkTGlEb3VFYjFzT3YxblUzeXY5cENMSzh1U01NVmthOUlNVUQ3SzhVcnFaYXhvcXFWTW5ueUpyZ3lvZTdDRDNEV1RvMFV3SUZFbmpJSUFiWlhuSkVIem1haHN2aEJ5RklRaVRTMUpCc2VRVWR1Vlk5THBudTZJNlJTamhQcDVuYXhr.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Hit Man นักฆ่า (ไม่) รับจ้าง (2023) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/02/10.jpg);" onclick="window.location.href='https://online225.com/hls/S2x2ZnZjc1FiS3JhREFKRzBRTzg5Q3F2RjByei84SC9JMTBaKzk2VmFOQ1htcjZGTmd4aTc2ZzVraWd2OVl3WkpQb3RWVmVxN1VnN1BEYS8wdDdBZ0FESWxwSDRvOGliMzVBSVhBdkNEREtCT2hWSDJ1QjZCY29sQTNJQXBER0pDWkpJZTQvZHZ0N3YrK3BsRk5lT2JBeUlMeGpibEhldVJ4ZjllSWpoQUdNSVhISHYyS2xDSlloVWVhM011Wm11.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Squad 36 หน่วย 36: ตำรวจมือพระกาฬ (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/02/550-9.jpg);" onclick="window.location.href='https://online225.com/hls/V0VRRGFURzVDSkdnWm9FQ2tVTDBEeWhad2U0ZngzNTZsVFc1MTRySHVSV2Z4UkdIQnJQM1VscGRHcjJ2UGxtZkpibERBUDZoK1BwdHM4SHl1RG5kOEJESXJFMDYvTUdlNUxreXRpb3czWWRUR3UzaUhFOWpXbGEyRFhZOXhuOSs5T2R4NnFyd040emRvbG1BeG1oVERnWjdiWEFxMDJNVEpPNG10TWU4cS95U3ExS2l4NERpd0Fqd0M1cnBRaW45.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Customs Frontline คนมหากาฬพิฆาตนรก (2024) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/02/441-2.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/SlBDaFdHUDJxSjUwS3lmS1ZHSFV3ZWV2VWhqU2ZWZ3AxeGhNZGQzekVRVEVUUEZUNTVtUjh0QUpXaFVOR2s2Y0ViR2ZUbE5iZ0Qzb3Fjais2TjM3OGJGd212L0NTWTNUK2tQUUNYK0JFWnRlZHRLeE1CVFZEL2NROUNVVHRNM1p2SnhYbGtVbGI5ZWtISzdQWS9ERnR5dU9telJHZVNSVENQYlJKY3B3WXZiSVd0czNMRlFrUU9jaDE5SFVQTVY2.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Demon City เมืองอสูร (2025) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/02/822.jpg);" onclick="window.location.href='https://online225.com/hls/WW1sdmdsUEN4SXJldm9MUzFURkNIK1o5RUpvZkp0OUx0elZ2QmFOd0R3RkFCRGlpbTlsRHZiRGZuTDRHWkZXM1NvaVI5YWE0c1hROEJmbEpyMU9sNmNMV2FoU3dhejkwaUQvN1FnRFp2R0l3bGFvcWVrVVE0QUZiWXN4dXdDVXJCQlcxTVAvL2hFekV2Si85SW1qZTF6eENiRzhYV09DRUVGeTNZYk1HUVJURnFKSGdUR2dxcUc2NklrK2gwL0U4.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">ธี่หยด 2 Death Whisperer 2 (2024) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/01/30.jpg);" onclick="window.location.href='https://online225.com/hls/RDVJNWhGME5rUDM3elRsMTFaUUF2Wm5WSyt3QzltLzRQcUZCZzdlR3ZrK1NnaVM3NG5TK1E2eFBVK2RCSGhnc1U0KzRUdFVBY0NnbTNnMjJGTUZtNjJqOHBSNmpCYWJKUnhVZURqNE9ZRzd6Z21RZnZKNWcyQklFOGRGQVMwcEJ5aWY5MXB0R3JBSU9LV25Pbk1iS3lOVUl5SE4vQnQwcEM2d2JLR3QzNm14T1FrSVpLU29zS09vRXhxYU81bjMx.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Kinda Pregnant สตรีมีคัน (2025) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/01/85350.jpg);" onclick="window.location.href='https://online225.com/hls/SDVvUHBBdDR6bDFnR212cXhFcDhIV0NwRGFYWEdlMER1Q1creGQ3WDM4OTExV0d3R3RsdHhVYlVJbVZIQWtYSG11OGsrSEI3dlUwK3pGdWNIWC85Vlo4bytmUzlEN2VOYXc5WnJjeFFHcEFtUjVKMjJFclZHVlZBRkFGd0ZQb1JrNThHcWt0N3hLTUp6RDlReE05NnFudU9RdUViNHAzR0VNRlBFVmFpTzE5SmJPZmg1N2lkYTVmK084UGJCVjMv.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Bogota: City of the Lost โบโกตา: เมืองคนหลง (2025) พากย์ไทย – Netflix</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/01/5040.jpg);" onclick="window.location.href='https://online225.com/hls/OTJ1YzJ3WS9WTi9wRGpUTERSMEtpZTgzeGVkWlNDYkhNcGYxS0w4ZG1oRHpVWFkrdGprUHkyYllKeW9nY242bzIxRWRsOXZ0Nzc0U1dsL3hEbUV5cS9pZ0FOTTRFeEtrVFowVHVBZ2Vab0VkRFhCSGQvdkp0bnd6NXZSMUh3a3BhYXpacVFpK251UGYvNUU4cmVGdm9KSFFkenIxMFQ0dGVWWDZ0eXE1aURxZ3doODNCb1Q4UjF5OHViNGNOL2ha.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Back in Action สายลับกลับมาลุย (2025) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/01/350-1.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/WlNCT1ZKanRkWEFaRGpLMVpsL1hHSGQ4RmNpd0N1WUpmaHVpZ1pia0h1enAxcEhpTStKSFdCRkRyTG42c3NLVUsxQldmQUNyKzdNekVUUnJnY3hlcG1KUWYvL0tIWnUyRFpIbnNSN0FoWlh0OEEydWM1SUNvMUJ0SlJVYnBPMGZsa1Fpc2k0OHE1TEt6RzMzRHlFZUx1OVFsK2RSUTFSVVFKc2tscUxIZ1ptVEsrb3c5cERYdU5vNHhnYnc5cEJn.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Escape หนีให้พ้นนรก (2024) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/01/540.png);" onclick="window.location.href='https://online225.com/hls/ZWc1MDlmRjcvU0xFeS9MZ09UeTdTaG15WkR2RC9nSFZ4dmFMOUVMUEh4dDBnSTlCU0xzTjFWSFZFendhbnRtNE9DMEpwSGdiYzhubkE4UkYxTm1IK2x1UE9QZWdCemZoS2wrUldZR1JFQnhSVjhQVjRiTThmck50M0VQQ213MjV0cEVKclZ4MldsL3FTemw2aHgwU2pxWEpuREFMWWNWOUNYdHNaL2U0MW1iVzV2QTIwdzhMcEE2R1Q0WnVMb1Iw.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">ปฏิบัติการเพื่อชีวิต Ad Vitam (2025) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2025/01/40.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/Ym0vbjBmZGNhUGJVWStOalhpcUF1OXBoQm9Fb0hQKzIxWjZ2NnFnQkRqK0FUZHFwdzJUWjRTTFVUQ3NVcmprMWhwdVovekx5TW9JLzlRcEVGVmpDUnhXQjArYkY3dkV0N0R4SjRiZEtFNXJKYWgxRGRCK2tWMm8vOWYwemJwTEJLUW1zcVVkalkzOUk1RHdWbXM1U2R3WCtkbFg0U3VrTUo5Mm9UT0VhZUtNQjJvajZETmdtbmhDZ1c1QXlWVHhX.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">วิมานหนาม The Paraside of Thorns (2024) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/12/510.jpg);" onclick="window.location.href='https://online225.com/hls/Y0lib1dML3VwN293UGtVSi9HZzVjUHdpYXV1c2RoaUxhb1cray9wOFZsc1lvUjRZeW9PU3Rhd0xnWkNTOFdPcFRBcFFMK0dyQjQ1bDhmTmFaL2NkQXEvZkZEWmJvbm5lRXYxQ29oc1I5em43N1pNM0VtK0pwamxsc2gvV1QydXdrRENacVhzZG0rTE44cnpmOWpaaEk4T3BzT2toRnh2T3BVdnZxWTVmT2VxS294bUVNVjRqSFp6QWxxdHluRW1I.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Moscow Mission ภารกิจท้านรก (2023) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/12/5240.png);" onclick="window.location.href='https://oklive-1.xyz/hls/bFFqSjEzQmRDdEhrQzA1bWJSWnJNZEQwUWY1VG1HandzeFc5OGdJOWVpTm8xZUMzcSt6K2JHYWRORjFkSWJhL2YwMFNTMXlqQXVDUHFBbk12aEpaZWh2RlNyU1ozSlpkaFdWQngxVTJ5RVBkT2dKek9jQncvSzFNM3A4RURWQkdFTUwyMERBR3ZOazVSbllEcXNsdm9nbE5ETm5EQmN1eGlQV0FGbzM5eUJLaEMybkNiVHZtVXJSR0tSWjl3YmZ0.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Red One เรด วัน (2024) พากย์ไทย เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/12/400-1.jpg);" onclick="window.location.href='https://online225.com/hls/ZUxxYmx0VHpmd0lBWUZBY2hVQ2lDOThKY2h3SzRkTmFKcXBXMnRGTG91MzdJcit6K1FhbTgzTWVHWkNLTXhRK0U2ZUh1cHdDK3NPUHE1dHM1Mm9aNGpFZWZzbmliV05ranRiMzBvMkdKaTZWSkN4L2pkWDdMQnhBbmpmK0psdG9UbFNBMkwxRU1TN2tOS1Mxd1FwUnE3WnArRmNVQzY2SzJjM3VXZ25OeFJrRm9Qd2xxWU50ZnBTZytja2tBcFhP.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Carry-On สัมภาระอันตราย (2024) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/12/4540-1.jpg);" onclick="window.location.href='https://online225.com/hls/UlV0Uk1KWVhwYWpnc1RBTE9FWkRkY0VmUS8yNHF5bDFGNjZPbmFJUEVhT2hiT044MHpOZzh5UjZXQkFGMG1pbkc2TG5keXhPeUlSekdFOUh3SWF0RFV5dy9aZjZJMHhTL1V2VEtWNEJiRldxamtwVTMrbE1vR1l2dTR0Q0dMVS9ZZEhJZ1ROZENObG9VN0sxQ0EvSnRqdU52UU9VdGwvRDhNMkFQbTVxVDN1M29MYU16Y0FwZFAvS0x1WlRTL1p5.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">ช.พ.๑ สมรภูมิคืนชีพ (2024) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/12/7340.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/ODNnclk4ajlicXkzUUFwZ1c5aFl2dDdycUw2blIrSEZ1TG1kZDdTdU5pQXBEWVRHVXowNDR0OGlHMU1lQnFJV0dHc2ppeUpoVFI5QStYQlNWR1FUUHVtQTJUL0l4NFg0QkNKUnR1QXRqMnM2ZlF2ZjdNZHNtMGhQY2loMFlEcEkwUlBtU3JCZkI2WkNmL3Qwdmd0bG54UUhhQklObGJoUlRPc2QxbTQyNG9lUkRhUVo2Q2h6K2tyMnVQb1ExNG5z.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Mary มารีย์ (2024) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/11/740-4.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/T3p4dENNQW9GUEc1eDlZN3c1akYwamNHT3pINHptb010YnZKQTBYZkRRUGU0eTlhVGEzMjMwS3BDOEZvUTBtN09CaWkzSG9jVis3MnBNZ2luSVI0ZHJJUDhzQm9iaUFrOWZjb3NleTVnOWswOHlld290dHgxUXBZR0lvWDQweU5IR2JrREtURjlvbCtNMDlneUZwQi8zU2xzRzh0S2pPYVpncDZPVTVKSy9MSEg5NGFaSnhWWnNMZUUyVUY2Yy9t.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">แดนสาป The Cursed Land (2024) HD เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/11/271.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/OWJzazFMbGM0UlFPTVBUdXBCWHU2ZVU2ckRYU3NaNVExY2cvZGExdW5aV1NzWGluK0FKSzkzbVBPZWpqbU5pUFhlTi9VcHJUbzJEU283cm1palplaGlZeDB3bWRwakNtRDNiUFhiRU5SbkhUbXU1a1p3QVBSOTdRSUFUZWtDL1NNcEVObC9VQit0Wko5OUc0NXMxTXo5RjZhdHIvK1JIVGt5VTV0YTN5ekxuWlZ2UW53VTkzdVEyV2o2bnl2eEVB.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">GTMAX (2024) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/11/30-2.jpg);" onclick="window.location.href='https://online225.com/hls/S2FLK01FK0RzZENIUzVaaDVKOWpRNHhzaHNTZUFoRGZrRmYvNmNBM0F0RzhxTmVSTHkyMWkzOE5ZQko1R09Vb3lYRlVYOGl6R0t2VWJqa3QzcUZnQWJwa2lHaGJSYjdlUFJrRWR1NlJvWTh0UnpIU2VuVWovZ0VWN3AzNlN0REZvWHE3emdaTjJXVW9XaUcrTGFxZ1F4ZFVvUVhhWHdORlhlcmRiZnhqVksxNFh3NnFvcHdENUVIMkRDd3NzMW10.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Deadpool &amp; Wolverine (2024) เดดพูล &amp; วูล์ฟเวอรีน พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/11/72.jpg);" onclick="window.location.href='https://online225.com/hls/TEZlWjg0MGh3M2tNV215dWI3eUNUaU1WN0h6aTNpUFRwUGwwM0YwRFV2VjlBVzdyZERWeUhqbVU1OVI5UEhWNU9yUUUzWVRNbzFFcTRmbkdXTDczbnJmV2dmeW1qYlM0dWZXc0MwRU5lNlpsVFNLZXRzU2lkYnpuanBxQUFVd2F1OGllQmQxVmNtbjNTc05lRjZuQ243eWpNbmhKSEU2Mm03bFNwdXZmYWVPWm1HaWp3aGt3b3hFMWRpRU5jVWdP.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Apocalypse Z: The Beginning of the End (2024) อะโพคาลิปซิส เซต้า: จุดเริ่มต้นของจุดจบ (พากย์ไทย)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/58350.jpg);" onclick="window.location.href='https://online225.com/hls/eVRsVElMSGFtckJrdUl3cDJzYW45ajZsM3Fzb0FycWprRU42TmNSRFRHRC9TcUJFcmVaZ2Z0ZTFlTWdDUHdkM3QzYnVpK1FmcXRoaVB3VVZudzRlNFc2ZVVFMzRMSnB6WEhQR2dsbWYvR2RISTRqMlQyaE5Fb3YvN2JHUmRpL0lmZVh2d1YzV3dtdkZCMVQyeldSSFdOWWRnMjYrc0xCajM2Z0pWWmNTUHQ1aXNDK2d4blRXbElxRXFTWk5XRG5m.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Love Stuck รักวนลูป (2024) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/770-1.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/K2ptd3ZrUENXY0hBbS94dDNGU0J1Y3NwS3MrQ3M0d1ZlZkk4RzRtUUJvcGFmanBIMm10YURMNDUyZHMyYjNBaVRIUVZzT1ZwbXliNmN4RHY4MHM4NHVVbUJIR0xhYVJ1N0lsNnp5TFFSUGtnVkxuTndoY1ZZQlRnVjlDbm1DVDIwQlNxNE5PWHl0MEFVRkhzQk8wTm5KKzk0ZXVoU2tSRmtpeVVRVWdkdk9KaWhRU0pwN0NyMklvMFlDKzJaUGVK.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Time Cut เจาะเวลาฆ่าอดีต (2024) พากย์ไทย-Netflix</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/8580.jpg);" onclick="window.location.href='https://online225.com/hls/OEE2VWtpaVkwZzd4Tk1NUnRaNU10SFdZTVhQeEVSMVhpVm5yM0hTSFpJbXc4cGpyWGZneHBEK2g3T3g1bThHdVlFZ1NjTTBIRFR0dXNDQkhSSHRwOCsxMEFQbkhDL1laNDMvT0Y1YnNWMHlSNXE3RUVhT2lRSXRyNUdmVUk1aC9QbjlvYit0S0ZOV1QyL3JCTkFUZjBwV1J5TTF1M1lRL3k2S3NCajMvaE1iUjYwa0gzTFBReGRGTUs5b2l4Z3Rk.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Exhuma ขุดมันขึ้นมาจากหลุม (2024) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/5350-1.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/dzZUd3lmMmhzVUk1Nkd6TXlZSlV3NUw2a0p0L0xJWG53QmNTcjN6dDFKUDgzdGw4VXlFbFZSNjh1Z0YxTmpucnRwNlBlZnMvV0t0cVJwamJOOFN4ak9aS0dQVFQyWFU4WERDUk9zbG1JYzFEdldKdDdCMERFUVZGUDh3NWNDN3JHMDNRTENlWjV3cm5nSncwbGRnRlZ2cWtLRTA3Y3psZEZJY1JEWHd4NmNDN3ZaMm5ZWnZ5djN0RENDQTBBVTdy.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">The Moon ปฏิบัติการพิชิตจันทร์ (2023) พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/8200.jpg);" onclick="window.location.href='https://online225.com/hls/YnNXZ2ZQTm5xeTRMM1NXZ0wvWkVxa2w5ZzZJWU5ucXE2SkpzbkxhZHJlZ0JZeHJsTUhnam1GQVFhRGpoVk9SaEExNXAwRitrSDJuYTUvREFzMm1tc2JFd0JNd3V5SHdUYWhCcTF2cW9zQ25qb0l3ZjBsaVBQNXh3dlBURWxKckprdjZsbmdOZmt3QnN4VmhKMERxb3FPQWxNM09PSnZ2cGR3azJCUGlmZ0kwd0txRit4UjgxekxwcCtTUUZac1J4.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">The Shadow Strays นักฆ่าเงาล่าทรชน (2024) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/8.50-1.jpg);" onclick="window.location.href='https://online225.com/hls/RTJidnBraUlFRjE3a0FmVTJqTDRLb3VwSTVPV0x4dStBVTlYRnNsUVdsbXdTblJxUHFCOWJ5YWZ5VStUcEU5MWMxL2t6MkhqZ0hXSFZicGxpckNHWVl6TjFjbE83R2xUZm5sUmgzWGxQN0pCelhSaG1qeGZkRzR1SzExWko3VHQwY3VlNndPRCtsczlJOVo1cGVxaVBvZzllcWFSR2lLT2tMWHRRT3YrMENaQVVlb09FbmxMU0ZycXlGVU5zQUpi.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">เทอม 3 Haunted Universities 3 (2024) เต็มเรื่อง HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/83-2.jpg);" onclick="window.location.href='https://oklive-1.xyz/hls/MFVpQXRReTV0Q0lQRTNRSVRQN0gzUlVXb3RqTDQ2aXFTTi9MWjVINVJsWUZrMnNWZ3laNWxSTS9oVW04ZFNFYUw5RWNadWIvTnpJT1hZTUJwTVh2dW5yNVdaaDNwWERrMWk5NFl0YUxrU21JdTNhQUlaUzdGTVpZc1RHRHZDU1JuOWc2eUkyNlJmTlRYZXkxY0JpdUxSSW9EK3M4bHYwT0JyRHNNVkkrQlBWTkRvcE9JN3RhaWVTNy9XWXExZkZt.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">Uprising กบฏผงาดแผ่นดิน (2024) พากย์ไทย เต็มเรื่อง</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/350-2.jpg);" onclick="window.location.href='https://online225.com/hls/Z1NiUE1KNWdleGhJTlBSTXl6cVZtbG10KzBhMmlEcUhvSC80b2NqNXpwcW5KOWhxNWtlMS9oWVpyQXFodFJRSkUwNVpqVC9CdjJWTnpWVUNReFA0TkZmTi80bUY3N3ZUc1RTK3lXS0JwY21MNmhTZTQwL3YwRnNUdDE0MDhpcm9IckVIU2xsUk9uN3RGSldGZW96TzI5QWcrcWYxbWZxaDcxWk1XY1liSE1YczhETFVQcWp4QlRNZG8wWEpNeklj.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">อนงค์ (2024) เต็มเรื่อง Netflix</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/9.png);" onclick="window.location.href='https://oklive-1.xyz/hls/VlJnSGJqc003MzFkajhoUHE2SFhQalR0cnpEdngwak55UVh1NGJBZzZrbk56VG9QMzl5TGlPN3RURXdNNWhoWHQ5S2JESEVSVlhVdVdid25FU0t3OWU4SzF4RU41SlFmZWxpWWZFeTNBejQ0a0x1amo2RURoVjhrSE5WUHA3Y3VHVGpTc3A2a3BFcGk3TkhhUHRCdE9BbWdnZ1o0ZUZhVHlhUDJiaDhldEJ0NHA5eHhJc2FEdzBocTVZNWE3ZEJ0.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">หอแต๋วแตกแหกสัปะหยด The Finale Oh My Ghost: The Finale (2024)</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/421.jpg);" onclick="window.location.href='https://online225.com/hls/VStXZmhqRmtTaUhYaGE4TlovRG9vcFFMODdadzFPVGY0RHBuY0h3dUZ3NWpFeC9YcG9BREtOR21FUitZenNWVVVBLzlpK2lrTFJqbjFVS0NKNERqYTh6RmQ4c3hVR2dOemFwMkNtVWRUaG5uenlUSkY5TVBLa2EzT1g0OFZsWWpMZlE3VFcwQ1dRdk1YV01qRXdsTm1OVjhiVkdBOUFzSnJvcXROUjZZcTlrWjNJdGdRQWNnaVpGNW9HSEpQQ1Nq.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">CTRL (2024) เต็มเรื่อง พากย์ไทย</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/83.jpg);" onclick="window.location.href='https://online225.com/hls/ZGZiOTluajNqbVNLV1RMdDM5Y3ZOeUZvWGtkc0ZRRXhUU2I2bkt4RzAzRlRZZ3NpVi9LMzkxZ01SdFYvd2EvMzM1L3NnN3B6OE1VdU5pWitlTHl1aVJ5R2wyemlWSi81aktidnIyVEJtU1JpNXBHRWc2WEZFcUp3RlNuSG9YMFhXbEhQbDJRYS8xNnlKOWVnTm43S1RFOXEyejE4WS9xb2duNXFKSlU1Zk9GamtkMEljZWZjSUxubDJuY0k2ekhS.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">It’s What’s Inside (2024) กระเป๋าลับสลับร่าง พากย์ไทย HD</div>
+</div>
+
+<div class="movie-item" data-category="ดูหนังออนไลน์ 🌳">
+  <div class="movie-box">
+    <div class="movie-image">
+      <button type="button" style="background-image:url(https://320hdd.com/wp-content/uploads/2024/10/740.jpg);" onclick="window.location.href='https://mycdn-hd.xyz/hls/eWJDN0tqbW5OWWkrZ0ViSkVJbmh4Vjc1bXJxWEM4Nk5uWGExRG1iSEJYUWQ3M3QzY2Q1akxXQzVLcTRtVEFoaHZIazljR1pDWHRWSjk1NkErc2p5MXE5aEN6UHU4UG5PaEx6RlV3bUx1d2NMb3BpbjZnNmRkeGZDMFhPMjJGRTJMYStMVHZiZnl5ZjU2a3FoVmJkM0lOMncwZ0FlVG92L21PTDhSaFFwOWRxWTNVTm5kMlp4TkNaazBVTlNQQ3BV.m3u'" autofocus="">
+      </button>
+    </div>
+  </div>
+  <div class="movie-title">The Platform 2 (2024) เดอะ แพลตฟอร์ม 2 HD พากย์ไทย</div>
+</div>
+
+
+          <!-- Pagination -->
+          <div class="pagination-wrapper">
+            <nav>
+              <ul class="pagination">
+                <li><a href="go:main-fw" aria-label="กลับหน้าหลัก"><span aria-hidden="true"><< กลับหน้าหลัก</span></a></li>
+                <li class="active"><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action1.html"><b>1</b></a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3212.html">122</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3213.html">13</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3214.html">14</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3215.html">15</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3216.html">16</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3217.html">17</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3218.html">18</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3219.html">19</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3220.html">20</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3211.html">11</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3212.html">122</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3213.html">13</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3214.html">14</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3215.html">15</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action322.html">หน้าต่อไป»</a></li>
+                <li><a href="https://udzaa2238.github.io/fw4free-action/fw4free-app24-action3233.html">หน้าสุดท้าย»</a></li>
+              </ul>
+            </nav>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
